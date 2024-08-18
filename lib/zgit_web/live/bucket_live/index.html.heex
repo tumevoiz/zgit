@@ -1,0 +1,43 @@
+<.header>
+  Listing Bucket
+  <:actions>
+    <.link patch={~p"/bucket/new"}>
+      <.button>New Bucket</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="bucket"
+  rows={@streams.bucket_collection}
+  row_click={fn {_id, bucket} -> JS.navigate(~p"/bucket/#{bucket}") end}
+>
+  <:col :let={{_id, bucket}} label="Name"><%= bucket.name %></:col>
+  <:col :let={{_id, bucket}} label="Description"><%= bucket.description %></:col>
+  <:col :let={{_id, bucket}} label="Local path"><%= bucket.local_path %></:col>
+  <:action :let={{_id, bucket}}>
+    <div class="sr-only">
+      <.link navigate={~p"/bucket/#{bucket}"}>Show</.link>
+    </div>
+    <.link patch={~p"/bucket/#{bucket}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, bucket}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: bucket.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="bucket-modal" show on_cancel={JS.patch(~p"/bucket")}>
+  <.live_component
+    module={ZgitWeb.BucketLive.FormComponent}
+    id={@bucket.id || :new}
+    title={@page_title}
+    action={@live_action}
+    bucket={@bucket}
+    patch={~p"/bucket"}
+  />
+</.modal>
